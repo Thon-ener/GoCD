@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+    server:
+#        tty: true
+#        image: gocd/gocd-server:v22.1.0
+        build: ./dc
+        ports:
+            - "8153:8153"
+            - "8154:8154"
+        volumes:
+            - ./godata:/godata
+            - ./godata/home:/home/go
+            - ./scripts/server:/docker-entrypoint.d
+            - ./scripts/shared:/shared
+
+    agent:
+        build: .
+        tty: true
+        environment:
+            - GO_SERVER_URL=http://server:8153/go
+            - AGENT_AUTO_REGISTER_KEY=agent-autoregister-key
+        volumes:
+            - ./agentdata:/godata
+            - ./scripts/agent:/docker-entrypoint.d
+            - ./scripts/shared:/shared
+#        deploy:
+#            replicas: 2
+        depends_on:
+            - server
